@@ -21,13 +21,13 @@
 ##---------------------------------General functions----------------------------------------
 
 #Calculating the observed/expected scale mean (multivariate)
-QGmvmean<-function(mu,vcov,link.inv,predict=NULL,rel.acc=0.01,width=10) {
+QGmvmean<-function(mu=NULL,vcov,link.inv,predict=NULL,rel.acc=0.01,width=10) {
   #Setting the integral width according to vcov (lower mean-w, upper mean+w)
   w<-sqrt(diag(vcov))*width
   #Number of dimensions
   d<-length(w)
   #If predict is not included, then use mu, and 
-  if(is.null(predict)) predict=matrix(mu,nrow=1)
+  if(is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=matrix(mu,nrow=1)}}
   #Computing the mean
   #The double apply is needed to compute the mean for all "predict" values,
   #then average over them
@@ -39,13 +39,13 @@ QGmvmean<-function(mu,vcov,link.inv,predict=NULL,rel.acc=0.01,width=10) {
 }
 
 #Calculating the expected scale variance-covariance matrix
-QGvcov<-function(mu,vcov,link.inv,var.func,mvmean.obs=NULL,predict=NULL,rel.acc=0.01,width=10,exp.scale=FALSE) {
+QGvcov<-function(mu=NULL,vcov,link.inv,var.func,mvmean.obs=NULL,predict=NULL,rel.acc=0.01,width=10,exp.scale=FALSE) {
   #Setting the integral width according to vcov (lower mean-w, upper mean+w)
   w<-sqrt(diag(vcov))*width
   #Number of dimensions
   d<-length(w)
   #If no fixed effects were included in the model
-  if (is.null(predict)) predict=matrix(mu,nrow=1)
+  if(is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=matrix(mu,nrow=1)}}
   
   #Computing the upper-triangle matrix of "expectancy of the square"
   v<-apply(#
@@ -84,13 +84,13 @@ QGvcov<-function(mu,vcov,link.inv,var.func,mvmean.obs=NULL,predict=NULL,rel.acc=
 }
 
 #Computing the Psi vector
-QGmvpsi<-function(mu,vcov,d.link.inv,predict=NULL,rel.acc=0.01,width=10) {
+QGmvpsi<-function(mu=NULL,vcov,d.link.inv,predict=NULL,rel.acc=0.01,width=10) {
   #Setting the integral width according to vcov (lower mean-w, upper mean+w)
   w<-sqrt(diag(vcov))*width
   #Number of dimensions
   d<-length(w)
   #If predict is not included, then use mu, and 
-  if(is.null(predict)) predict=matrix(mu,nrow=1)
+  if(is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=matrix(mu,nrow=1)}}
   #Computing the mean
   #The double apply is needed to compute the mean for all "predict" values,
   #then average over them
@@ -107,14 +107,16 @@ QGmvpsi<-function(mu,vcov,d.link.inv,predict=NULL,rel.acc=0.01,width=10) {
 
 ##--------------------------------Meta-function for general calculation-----------------------------
 
-QGmvparams<-function(mu,vcv.G,vcv.P,models,predict=NULL,rel.acc=0.01,width=10,n.obs=NULL,theta=NULL,verbose=TRUE)
+QGmvparams<-function(mu=NULL,vcv.G,vcv.P,models,predict=NULL,rel.acc=0.01,width=10,n.obs=NULL,theta=NULL,verbose=TRUE)
 {
+  #Error if ordinal is used (multivariate code not available yet)
+  if ("ordinal" %in% models) {stop("Multivariate functions of QGglmm are not able to address ordinal traits (yet?).")}
   #Setting the integral width according to vcov (lower mean-w, upper mean+w)
   w<-sqrt(diag(vcv.P))*width
   #Number of dimensions
   d<-length(w)
   #If predict is not included, then use mu, and 
-  if(is.null(predict)) predict=matrix(mu,nrow=1)
+  if(is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=matrix(mu,nrow=1)}}
   #Defining the link/distribution functions
   #If a vector of names were given
   if (!(is.list(models))) {
@@ -145,27 +147,27 @@ QGmvparams<-function(mu,vcv.G,vcv.P,models,predict=NULL,rel.acc=0.01,width=10,n.
   }
   #Computing the observed mean
   if (verbose) print("Computing observed mean...")
-  y_bar<-QGmvmean(mu=mu,vcov=vcv.P,link.inv=inv.links,predict=predict,rel.acc=rel.acc,width=width)
+  z_bar<-QGmvmean(mu=mu,vcov=vcv.P,link.inv=inv.links,predict=predict,rel.acc=rel.acc,width=width)
   #Computing the variance-covariance matrix
   if (verbose) print("Computing variance-covariance matrix...")
-  vcv.P.obs<-QGvcov(mu=mu,vcov=vcv.P,link.inv=inv.links,var.func=var.funcs,mvmean.obs=y_bar,predict=predict,rel.acc=rel.acc,width=width,exp.scale=FALSE)
+  vcv.P.obs<-QGvcov(mu=mu,vcov=vcv.P,link.inv=inv.links,var.func=var.funcs,mvmean.obs=z_bar,predict=predict,rel.acc=rel.acc,width=width,exp.scale=FALSE)
   if (verbose) print("Computing Psi...")
   Psi<-QGmvpsi(mu=mu,vcov=vcv.P,d.link.inv=d.inv.links,predict=predict,rel.acc=rel.acc,width=width)
   vcv.G.obs <- Psi %*% vcv.G %*% t(Psi)
   #Return a list of QG parameters on the observed scale
-  list(mean.obs=y_bar,vcv.P.obs=vcv.P.obs,vcv.G.obs=vcv.G.obs)
+  list(mean.obs=z_bar,vcv.P.obs=vcv.P.obs,vcv.G.obs=vcv.G.obs)
 }
 
 ##----------------------------------Function to calculate the evolutive prediction-----------------------------
 
-QGmvpred<-function(mu,vcv.G,vcv.P,fit.func,d.fit.func,predict=NULL,rel.acc=0.01,width=10,verbose=TRUE)
+QGmvpred<-function(mu=NULL,vcv.G,vcv.P,fit.func,d.fit.func,predict=NULL,rel.acc=0.01,width=10,verbose=TRUE)
 {
   #Setting the integral width according to vcov (lower mean-w, upper mean+w)
   w<-sqrt(diag(vcv.P))*width
   #Number of dimensions
   d<-length(w)
   #If predict is not included, then use mu, and 
-  if(is.null(predict)) predict=matrix(mu,nrow=1)
+  if(is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=matrix(mu,nrow=1)}}
   #Calculating the latent mean fitness
   if (verbose) print("Computing mean fitness...")     
   Wbar<-mean(apply(predict,1,function(pred_i){

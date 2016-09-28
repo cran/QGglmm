@@ -1,10 +1,17 @@
 # QGglmm
 
-##Warning!
+##What is this package?
 
-The package is still in pre-release beta version. Use at your own risks! The package should compile and install itself in R, and all the functions should work without critical issue.
+QGglmm computes various quantitative genetics parameters on the observed data scale from latent parameters estimated using a Generalised Linear Mixed Model (GLMM) estimates. Especially, it yields the phenotypic mean, phenotypic variance and additive genetic variance on the observed data scale.
+
+More information can be found in this [article](http://dx.doi.org/10.1534/genetics.115.186536) and on [CRAN](https://CRAN.R-project.org/package=QGglmm).
 
 ##How to install this package
+
+###Using CRAN
+* Simply use `install.packages("QGglmm")` as for any package.
+
+###From this GitHub
 
 * Install the packages on which QGglmm depends: R2Cuba and mvtnorm.
     `install.packages(c("R2Cuba","mvtnorm"))`

@@ -6,11 +6,11 @@
 This function calculates the phenotypic mean on the observed scale from the latent mean and variance.
 }
 \usage{
-QGmean(mu, var, link.inv, predict = NULL, width = 10)
+QGmean(mu=NULL, var, link.inv, predict = NULL, width = 10)
 }
 \arguments{
-  \item{mu}{Latent intercept estimated from a GLMM (ignored if predict is not \code{NULL}). (numeric)}
-  \item{var}{Latent total variance estimated from a GLMM. Usually, the sum of the estimated variances of the random effects, plus the "residual" variance. (numeric)}
+  \item{mu}{Latent intercept estimated from a GLMM (ignored if predict is not \code{NULL}). (numeric of length 1)}
+  \item{var}{Latent total variance estimated from a GLMM. Usually, the sum of the estimated variances of the random effects, plus the "residual" variance. (numeric of length 1)}
   \item{link.inv}{Inverse function of the link function. (function)}
   \item{predict}{Optional vector of predicted values on the latent scale (i.e. matrix product \bold{Xb}). The latent predicted values must be computed while only accounting for the fixed effects (marginal to the random effects). (numeric)}
   \item{width}{Parameter for the integral computation. The integral is evaluated from \code{mu}-\code{width*sqrt(var)} to \code{mu}+\code{width*sqrt(var)}. The default value is 10, which should be sensible for most models. (numeric)}
@@ -26,7 +26,7 @@ Contrary to \code{\link{QGparams}}, \code{QGmean.obs} never uses the closed form
 \value{This function yields the phenotypic mean on the observed scale. (numeric)}
 
 \author{
-Pierre de Villemereuil & Micheal B. Morrissey
+Pierre de Villemereuil & Michael B. Morrissey
 }
 \seealso{
 \code{\link{QGmvmean}}, \code{\link{QGparams}}, \code{\link{QGpred}}, \code{\link{QGlink.funcs}}, \code{\link{QGvar.dist}}, \code{\link{QGvar.exp}}, \code{\link{QGpsi}}

@@ -6,7 +6,7 @@
 This function computes the total phenotypic variance-covariance matrix on the observed or expected scales.
 }
 \usage{
-QGvcov(mu, vcov, link.inv, var.func, mvmean.obs = NULL,
+QGvcov(mu=NULL, vcov, link.inv, var.func, mvmean.obs = NULL,
           predict = NULL, rel.acc = 0.01, width = 10, exp.scale = FALSE)
 }
 \arguments{
@@ -28,7 +28,7 @@ To do so, it also requires the inverse functions of the link functions (\code{li
 \value{This function yields the phenotypic variance-covariance on the observed or expected scale. (numeric)}
 
 \author{
-Pierre de Villemereuil & Micheal B. Morrissey
+Pierre de Villemereuil & Michael B. Morrissey
 }
 \seealso{
 \code{\link{QGvar.exp}}, \code{\link{QGvar.dist}}, \code{\link{QGmvparams}}, \code{\link{QGlink.funcs}}, \code{\link{QGmvpsi}}

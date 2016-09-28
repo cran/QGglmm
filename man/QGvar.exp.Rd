@@ -4,12 +4,12 @@
 \title{Compute the variance of expected values (i.e. the latent values after inverse-link transformation.)}
 \description{This function computes the variance of the expected values, i.e. the variance of the latent values after transformation through the inverse-link function. This variance, added to the distribution variance, yields to the phenotypic variance on the observed scale.}
 \usage{
-QGvar.exp(mu, var, link.inv, obs.mean = NULL, predict = NULL, width = 10)
+QGvar.exp(mu=NULL, var, link.inv, obs.mean = NULL, predict = NULL, width = 10)
 }
 
 \arguments{
-  \item{mu}{Latent intercept estimated from a GLMM (ignored if predict is not \code{NULL}). (numeric)}
-  \item{var}{Latent total phenotypic variance estimated from a GLMM. Usually, the sum of the estimated variances of the random effects, plus the "residual" variance. (numeric)}
+  \item{mu}{Latent intercept estimated from a GLMM (ignored if predict is not \code{NULL}). (numeric of length 1)}
+  \item{var}{Latent total phenotypic variance estimated from a GLMM. Usually, the sum of the estimated variances of the random effects, plus the "residual" variance. (numeric of length 1)}
   \item{link.inv}{Inverse function of the link function. (function)}
   \item{obs.mean}{Optional parameter giving the phenotypic mean on the observed scale. Automatically computed if not provided. (numeric)}
   \item{predict}{Optional vector of predicted values on the latent scale (i.e. matrix product \bold{Xb}). The latent predicted values must be computed while only accounting for the fixed effects (marginal to the random effects). (numeric)}
@@ -29,7 +29,7 @@ Contrary to \code{\link{QGparams}}, \code{QGvar.dist} never uses the closed form
 \value{This function yields the variance of the expected values. (numeric)}
 
 \author{
-Pierre de Villemereuil & Micheal B. Morrissey
+Pierre de Villemereuil & Michael B. Morrissey
 }
 \seealso{
 \code{\link{QGvar.dist}}, \code{\link{QGparams}}, \code{\link{QGpred}}, \code{\link{QGlink.funcs}}, \code{\link{QGmean}}, \code{\link{QGpsi}}

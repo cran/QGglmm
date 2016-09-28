@@ -1,20 +1,20 @@
-\name{QGmvparams}
-\alias{QGmvparams}
+\name{QGmvicc}
+\alias{QGmvicc}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-  Quantitative Genetics parameters from GLMM estimates (multivariate analysis).
+  Intra-Class Correlation coefficients (ICC) on the observed data scale (multivariate analysis).
 }
 \description{
-  Function to estimate the multivariate quantitative genetics parameters on the observed scale based on estimates on the latent scale. Contrary to the univariate function, this one cannot use the analytical closed forms and yields a list of paramaters instead of a data.frame.
+Function to estimate the variance-covariance matrix of a variance component on the observed scale based on estimates on the latent scale. Contrary to the univariate function, this one cannot use the analytical closed forms and yields a list of paramaters instead of a data.frame.
 }
 \usage{
-    QGmvparams(mu=NULL, vcv.G, vcv.P, models, predict = NULL, rel.acc = 0.01, 
+    QGmvicc(mu=NULL, vcv.comp, vcv.P, models, predict = NULL, rel.acc = 0.01, 
     width = 10, n.obs = NULL, theta = NULL, verbose = TRUE)
 }
 
 \arguments{
   \item{mu}{Vector of latent intercepts estimated from a GLMM (ignored if predict is not \code{NULL}). (numeric)}
-  \item{vcv.G}{Genetic additive variance-covariance matrix (a.k.a. G-matrix). (numeric)}
+  \item{vcv.comp}{Component variance-covariance matrix (G-matrix-like). (numeric)}
   \item{vcv.P}{Total phenotypic variance-covariance matrix. Usually, the sum of all the estimated variance-covariance matrices. (numeric)}
   \item{models}{A vector containing the names of the model used or a list which elements contain the list of the functions needed (inverse-link, distribution variance and derivative of the inverse-link, as stated in the output of \code{QGlink.funcs()}). (character vector or list of lists of functions) Available model names are :
     \itemize{
@@ -43,7 +43,7 @@ Only the most typical distribution/link function couples are implemented through
 
 Some distributions require extra-arguments. This is the case for "binomN", which require the number of trials N, passed with the argument \code{n.obs}. The distribution "negbin" requires a dispersion parameter \code{theta}, such as the variance of the distribution is \code{mean + mean**2/theta} (mean/dispersion parametrisation). For now, the arguments \code{n.obs} and \code{theta} can be used for ONE distribution only.
 
-If fixed effects (apart from the intercept) have been included in the GLMM, they can be included through the argument \code{predict} as a matrix of the marginal predicted values, i.e. predicted values excluding the random effects, for each trait (one trait per column of the matrix, see Example below).Note this can considerably slow down the algorithm, especially when no closed form is used.
+If fixed effects (apart from the intercept) have been included in the GLMM, they can be included through the argument \code{predict} as a matrix of the marginal predicted values, i.e. predicted values excluding the random effects, for each trait (one trait per column of the matrix, see Example below).Note that computation can be extremely slow in that case.
  
 }
 
@@ -51,27 +51,27 @@ If fixed effects (apart from the intercept) have been included in the GLMM, they
 The function yields a list containing the following values:
   \item{mean.obs}{Vector of phenotypic means on the observed scale.}
   \item{vcv.P.obs}{Phenotypic variance-covariance matrix on the observed scale.}
-  \item{vcv.G.obs}{Additive genetic variance-covariance (a.k.a. G-matrix) on the observed scale.}
+  \item{vcv.comp.obs}{Component variance-covariance (G-matrix-like, but broad-sense) on the observed scale.}
 }
 
 \author{
 Pierre de Villemereuil & Michael B. Morrissey
 }
 \seealso{
-\code{\link{QGparams}}, \code{\link{QGlink.funcs}}, \code{\link{QGmvmean}}, \code{\link{QGvcov}}, \code{\link{QGmvpsi}}
+\code{\link{QGmvparams}}, \code{\link{QGlink.funcs}}, \code{\link{QGmvmean}}, \code{\link{QGvcov}}, \code{\link{QGmvpsi}}
 }
 \examples{
 ##Example using a bivariate model (Binary trait/Gaussian trait)
 #Parameters
 mu=c(0,1)
 G=diag(c(0.5,2))
+M=diag(c(0.2,1))  #Maternal effect VCV matrix
 P=diag(c(1,4))
 
-#Note: no phenotypic, nor genetic correlations, hence should be equal to univariate case!
-
-#Multivariate analysis
-QGmvparams(mu=mu,vcv.G=G,vcv.P=P,models=c("binom1.probit","Gaussian"))
-QGparams(mu=0,var.a=0.5,var.p=1,model="binom1.probit") #Consistent results!
+#Broad-sense "G-matrix" on observed data scale
+\dontrun{QGmvicc(mu=mu,vcv.comp=G,vcv.P=P,models=c("binom1.probit","Gaussian"))}
+#Maternal effect VCV matrix on observed data scale
+\dontrun{QGmvicc(mu=mu,vcv.comp=M,vcv.P=P,models=c("binom1.probit","Gaussian"))}
 #Reminder: the results are the same here because we have no correlation between the two traits
 
 #Defining the model "by hand" using the list
@@ -84,7 +84,7 @@ list.models=list(
               var.func=function(x){0})
 )
 #Running the same analysis than above
-QGmvparams(mu=mu,vcv.G=G,vcv.P=P,models=list.models) #Same results!
+\dontrun{QGmvicc(mu=mu,vcv.comp=M,vcv.P=P,models=list.models)}
 
 #Using predicted values
 #Say we have 100  individuals
@@ -93,6 +93,6 @@ n=100
 p<-matrix(c(runif(n),runif(n)),ncol=2)
 #Note that p has as many as columns as we have traits (i.e. two)
 #Multivariate analysis with predicted values
-\dontrun{QGmvparams(predict=p,vcv.G=G,vcv.P=P,models=c("binom1.probit","Gaussian"))}
-#Commented out as computing will take some time...
+\dontrun{QGmvicc(predict=p,vcv.comp=M,vcv.P=P,models=c("binom1.probit","Gaussian"))}
+#That can be extremely long to run!!
 }

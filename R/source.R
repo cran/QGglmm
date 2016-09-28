@@ -21,15 +21,17 @@
 ##---------------------------------General functions----------------------------------------
 
 #Calculating the observed/expected scale mean
-QGmean<-function(mu,var,link.inv,predict=NULL,width=10) {
+QGmean<-function(mu=NULL,var,link.inv,predict=NULL,width=10) {
+  if(length(mu)>1 | length(var) >1) stop("The parameters mu and var must be of length 1, please check your input.")
   #If no fixed effects were included in the model
-  if (is.null(predict)) predict=mu;
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   mean(sapply(predict,function(pred_i){integrate(f=function(x){link.inv(x)*dnorm(x,pred_i,sqrt(var))},lower=pred_i-width*sqrt(var),upper=pred_i+width*sqrt(var))$value}))
 }
 
 #Calculating the expected scale variance
-QGvar.exp<-function(mu,var,link.inv,obs.mean=NULL,predict=NULL,width=10) {
-  if (is.null(predict)) predict=mu;
+QGvar.exp<-function(mu=NULL,var,link.inv,obs.mean=NULL,predict=NULL,width=10) {
+  if(length(mu)>1 | length(var) >1) stop("The parameters mu and var must be of length 1, please check your input.")
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   #If not provided, compute the obsereved mean
   if (is.null(obs.mean)){
     obs.mean=QGmean(mu=mu,var=var,link.inv=link.inv,width=width,predict=predict)
@@ -39,16 +41,18 @@ QGvar.exp<-function(mu,var,link.inv,obs.mean=NULL,predict=NULL,width=10) {
 }
 
 #Calculating the "distribution" variance
-QGvar.dist<-function(mu,var,var.func,predict=NULL,width=10) {
+QGvar.dist<-function(mu=NULL,var,var.func,predict=NULL,width=10) {
+  if(length(mu)>1 | length(var) >1) stop("The parameters mu and var must be of length 1, please check your input.")
   #If no fixed effects were included in the model
-  if (is.null(predict)) predict=mu;
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   mean(sapply(predict,function(pred_i){integrate(f=function(x){var.func(x)*dnorm(x,pred_i,sqrt(var))},lower=pred_i-width*sqrt(var),upper=pred_i+width*sqrt(var))$value}))
 }
 
 #Calculating "psi" for the observed additive genetic variance computation
-QGpsi<-function(mu,var,d.link.inv,predict=NULL,width=10) {
+QGpsi<-function(mu=NULL,var,d.link.inv,predict=NULL,width=10) {
+  if(length(mu)>1 | length(var) >1) stop("The parameters mu and var must be of length 1, please check your input.")
     #If no fixed effects were included in the model
-  if (is.null(predict)) predict=mu;
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
     mean(sapply(predict,function(pred_i){integrate(f=function(x){d.link.inv(x)*dnorm(x,pred_i,sqrt(var))},lower=pred_i-width*sqrt(var),upper=pred_i+width*sqrt(var))$value}))
 }
 
@@ -78,9 +82,8 @@ QGlink.funcs<-function(name,n.obs=NULL,theta=NULL) {
     inv.link=function(x){n.obs*plogis(x)}
     var.func=function(x){n.obs*plogis(x)*(1-plogis(x))}
     d.inv.link=function(x){n.obs*dlogis(x)}
-  } else if (name=="threshold") {
-      ##TODO
-      stop("Not implemented yet")
+  } else if (name=="ordinal") {
+      stop("ordinal models are particular, please use the QGparams function only")
   } else if (name=="Poisson.log") {
     inv.link=function(x){exp(x)}
     var.func=function(x){exp(x)}
@@ -105,15 +108,17 @@ QGlink.funcs<-function(name,n.obs=NULL,theta=NULL) {
 
 ##-----------------------------Special functions for known analytical solutions--------------
 
-qg.Gaussian=function(mu,var.a,var.p,predict=NULL) {
-  if (is.null(predict)) predict=mu;
+qg.Gaussian=function(mu=NULL,var.a,var.p,predict=NULL) {
+  if(length(mu)>1 | length(var.a)!=1 | length(var.p) != 1) stop("The parameters mu, var.a and var.p must be of length 1, please check your input.")
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   #Nothing to be done, except averaging over predict
   if (length(predict)==1) {var_fixed=0} else {var_fixed=var(predict)}
   data.frame(mean.obs=mean(predict),var.obs=var.p+var_fixed,var.a.obs=var.a,h2.obs=var.a/(var.p+var_fixed))
 }
 
-qg.binom1.probit=function(mu,var.a,var.p,predict=NULL) {
-  if (is.null(predict)) predict=mu;
+qg.binom1.probit=function(mu=NULL,var.a,var.p,predict=NULL) {
+  if(length(mu)>1 | length(var.a)!=1 | length(var.p) != 1) stop("The parameters mu, var.a and var.p must be of length 1, please check your input.")
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   #Observed mean
   p=mean(1-pnorm(0,predict,sqrt(var.p+1)))
   #Observed variance
@@ -123,8 +128,9 @@ qg.binom1.probit=function(mu,var.a,var.p,predict=NULL) {
   data.frame(mean.obs=p,var.obs=var_obs,var.a.obs=(Psi**2)*var.a,h2.obs=((Psi**2)*var.a)/var_obs)
 }
 
-qg.binomN.probit=function(mu,var.a,var.p,n.obs,predict=NULL,width=10) {
-  if (is.null(predict)) predict=mu;
+qg.binomN.probit=function(mu=NULL,var.a,var.p,n.obs,predict=NULL,width=10) {
+  if(length(mu)>1 | length(var.a)!=1 | length(var.p) != 1) stop("The parameters mu, var.a and var.p must be of length 1, please check your input.")
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   #Observed mean
   p=n.obs*mean(1-pnorm(0,predict,sqrt(var.p+1)))
   #Observed variance
@@ -135,8 +141,9 @@ qg.binomN.probit=function(mu,var.a,var.p,n.obs,predict=NULL,width=10) {
   data.frame(mean.obs=p,var.obs=var_obs,var.a.obs=(Psi**2)*var.a,h2.obs=((Psi**2)*var.a)/var_obs)
 }
 
-qg.Poisson.log=function(mu,var.a,var.p,predict=NULL) {
-  if (is.null(predict)) predict=mu;
+qg.Poisson.log=function(mu=NULL,var.a,var.p,predict=NULL) {
+  if(length(mu)>1 | length(var.a)!=1 | length(var.p) != 1) stop("The parameters mu, var.a and var.p must be of length 1, please check your input.")
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   #Observed mean
   lambda=mean(exp(predict+(var.p/2)))
   #Mean of lambda square, needed for the following
@@ -146,8 +153,9 @@ qg.Poisson.log=function(mu,var.a,var.p,predict=NULL) {
   data.frame(mean.obs=lambda,var.obs=var_obs,var.a.obs=(lambda**2)*var.a,h2.obs=((lambda**2)*var.a)/var_obs)
 }
 
-qg.Poisson.sqrt=function(mu,var.a,var.p,predict=NULL) {
-  if (is.null(predict)) predict=mu;
+qg.Poisson.sqrt=function(mu=NULL,var.a,var.p,predict=NULL) {
+  if(length(mu)>1 | length(var.a)!=1 | length(var.p) != 1) stop("The parameters mu, var.a and var.p must be of length 1, please check your input.")
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   #Observed mean
   lambda=mean((predict)**2+var.p)
   #Observed variance
@@ -157,8 +165,9 @@ qg.Poisson.sqrt=function(mu,var.a,var.p,predict=NULL) {
   data.frame(mean.obs=lambda,var.obs=var_obs,var.a.obs=(Psi**2)*var.a,h2.obs=((Psi**2)*var.a)/var_obs)
 }
 
-qg.negbin.log=function(mu,var.a,var.p,theta,predict=NULL) {
-  if (is.null(predict)) predict=mu;
+qg.negbin.log=function(mu=NULL,var.a,var.p,theta,predict=NULL) {
+  if(length(mu)>1 | length(var.a)!=1 | length(var.p) != 1) stop("The parameters mu, var.a and var.p must be of length 1, please check your input.")
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   #Observed mean
   lambda=mean(exp(predict+(var.p/2)))
   #Mean of lambda square, needed for the following
@@ -168,8 +177,9 @@ qg.negbin.log=function(mu,var.a,var.p,theta,predict=NULL) {
   data.frame(mean.obs=lambda,var.obs=var_obs,var.a.obs=(lambda**2)*var.a,h2.obs=((lambda**2)*var.a)/var_obs)
 }
 
-qg.negbin.sqrt=function(mu,var.a,var.p,theta,predict=NULL) {
-  if (is.null(predict)) predict=mu;
+qg.negbin.sqrt=function(mu=NULL,var.a,var.p,theta,predict=NULL) {
+  if(length(mu)>1 | length(var.a)!=1 | length(var.p) != 1) stop("The parameters mu, var.a and var.p must be of length 1, please check your input.")
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   #Observed mean
   lambda=mean((predict)**2+var.p)
   #Observed variance
@@ -181,8 +191,9 @@ qg.negbin.sqrt=function(mu,var.a,var.p,theta,predict=NULL) {
 
 ##--------------------------------Meta-function for general calculation-----------------------------
 
-QGparams<-function(mu,var.a,var.p,model="",width=10,predict=NULL,closed.form=TRUE,custom.model=NULL,n.obs=NULL,theta=NULL,verbose=TRUE) {
-  if (is.null(predict)) predict=mu;
+QGparams<-function(mu=NULL,var.a,var.p,model="",width=10,predict=NULL,closed.form=TRUE,custom.model=NULL,n.obs=NULL,cut.points=NULL,theta=NULL,verbose=TRUE) {
+  if(length(mu)>1 | length(var.a)!=1 | length(var.p) != 1) stop("The parameters mu, var.a and var.p must be of length 1, please check your input.")
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   ##Using analytical solutions if possible (and asked for, see closed.form arg)
   if (model=="Gaussian"&closed.form) {            #Gaussian model with identity link (e.g. LMM)
     if (verbose) print("Using the closed forms for a Gaussian model with identity link (e.g. LMM).")
@@ -192,8 +203,8 @@ QGparams<-function(mu,var.a,var.p,model="",width=10,predict=NULL,closed.form=TRU
       qg.binom1.probit(mu=mu,var.a=var.a,var.p=var.p,predict=predict)
   } else if (model=="binomN.probit"&closed.form) {					#Binomial-not-binary model
       if (is.null(n.obs)) {stop("binomN.probit model used, but no observation number (n.obs) defined.")}
-      if (verbose) print("Using the closed forms for a BinomialN-probit model.")
-      warning("Some component (var.obs) are not totally from a closed form solution:an integral is computed")
+      if (verbose) print("Using a semi-closed form for a BinomialN-probit model.")
+      warning("Some component (var.obs) are not totally from a closed form solution: an integral is computed")
       qg.binomN.probit(mu=mu,var.a=var.a,var.p=var.p,predict=predict,n.obs=n.obs,width=width)
   } else if (model=="Poisson.log"&closed.form){						#Poisson-log model
       if(verbose) print("Using the closed forms for a Poisson-log model.")
@@ -209,6 +220,10 @@ QGparams<-function(mu,var.a,var.p,model="",width=10,predict=NULL,closed.form=TRU
       if (is.null(theta)) {stop("negbin model used, but theta not defined.")}
       if(verbose) print("Using the closed forms for a NegativeBinomial-sqrt model.")
       qg.negbin.sqrt(mu=mu,var.a=var.a,var.p=var.p,predict=predict,theta=theta)
+  } else if (model=="ordinal"){								#Ordinal model
+    if (is.null(cut.points)) {stop("cut points must be specified to use the ordinal model.")}
+    if(verbose) print("Using the closed forms for an ordinal model (ignoring the closed.form argument)")
+    qg.ordinal(mu=mu,var.a=var.a,var.p=var.p,predict=predict,cut.points=cut.points)
   } else {
   
   ##Else, use the general integral equations
@@ -219,24 +234,25 @@ QGparams<-function(mu,var.a,var.p,model="",width=10,predict=NULL,closed.form=TRU
         }} else {funcs=custom.model}
   #Observed mean computation
       if (verbose) print("Computing observed mean...")
-      y_bar=QGmean(mu=mu,var=var.p,link.inv=funcs$inv.link,width=width,predict=predict)
+      z_bar=QGmean(mu=mu,var=var.p,link.inv=funcs$inv.link,width=width,predict=predict)
   #Variances computation
       if (verbose) print("Computing variances...")
-      var_exp=QGvar.exp(mu=mu,var=var.p,link.inv=funcs$inv.link,obs.mean=y_bar,width=width,predict=predict)
+      var_exp=QGvar.exp(mu=mu,var=var.p,link.inv=funcs$inv.link,obs.mean=z_bar,width=width,predict=predict)
       var_dist=QGvar.dist(mu=mu,var=var.p,var.func=funcs$var.func,width=width,predict=predict)
       var_obs=var_exp+var_dist
   #Psi computation (for the observed additive genetic variance)
       if (verbose) print("Computing Psi...")
       Psi=QGpsi(mu=mu,var=var.p,d.link.inv=funcs$d.inv.link,width=width,predict=predict)
   #Return a data.frame with the calculated components
-      data.frame(mean.obs=y_bar,var.obs=var_obs,var.a.obs=(Psi**2)*var.a,h2.obs=((Psi**2)*var.a)/var_obs)
+      data.frame(mean.obs=z_bar,var.obs=var_obs,var.a.obs=(Psi**2)*var.a,h2.obs=((Psi**2)*var.a)/var_obs)
   }
 }
 
 ##----------------------------------Function to calculate the evolutive prediction-----------------------------
 
-QGpred<-function(mu,var.a,var.p,fit.func,d.fit.func,width=10,predict=NULL,verbose=TRUE) {
-  if (is.null(predict)) predict=mu;
+QGpred<-function(mu=NULL,var.a,var.p,fit.func,d.fit.func,width=10,predict=NULL,verbose=TRUE) {
+  if(length(mu)>1 | length(var.a)!=1 | length(var.p) != 1) stop("The parameters mu, var.a and var.p must be of length 1, please check your input.")
+  if (is.null(predict)) { if(is.null(mu)) {stop("Please provide either mu or predict.")} else {predict=mu;}}
   #Calculating the latent mean fitness
   if (verbose) print("Computing mean fitness...")
   Wbar<-mean(sapply(predict,function(pred_i){integrate(f=function(x){fit.func(x)*dnorm(x,pred_i,sqrt(var.p))},lower=pred_i-width*sqrt(var.p),upper=pred_i+width*sqrt(var.p))$value}))

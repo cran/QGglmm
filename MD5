@@ -1,4 +1,4 @@
-11c1064f09f06b75c8fdacad91f154b6 *DESCRIPTION
+9aa0c841107ad58b0c956ec4b2c84b9d *DESCRIPTION
 9daa7a8ec49852a0f381b5f9ffe8d907 *NAMESPACE
 61691888224ef3f11f3c482dc77f907e *NEWS.md
 b1643e970bcf9339cc3c6f7416869683 *R/source.R
@@ -8,8 +8,8 @@ b2df8b416afb1ee05371e03e016fd52f *R/source.ordinal.R
 ecc1fcca3c69e8eb146971c93ede7a08 *README.md
 dc8b6a5a236f4ae778843729b75fa34e *build/vignette.rds
 5c1bae953d8b64ebe4df3fdc0868e0f4 *inst/CITATION
-875507f3f52f142b64d9f5c53a406508 *inst/doc/QGglmmHowTo.Rnw
-f03a5caf4ae87fb54a7ec2877b1c1a04 *inst/doc/QGglmmHowTo.pdf
+da67048abe1ada581991c6b425e37b9a *inst/doc/QGglmmHowTo.Rnw
+d7a33cc01573278844ce8a77195286a7 *inst/doc/QGglmmHowTo.pdf
 c957051a4c42420f0067a67fe8344a34 *man/QGglmm-package.Rd
 968e01478ad7dac7fb0fbd8ad0f1dcae *man/QGicc.Rd
 e3329ad9f3488b32fbe05aa0726549e2 *man/QGlink.funcs.Rd
@@ -30,7 +30,7 @@ f4b5a5407e5317f60e289b8290237f79 *vignettes/Figs/expected.pdf
 8fac098b405f116afba359cba3ff1dcf *vignettes/Figs/latent.pdf
 64096fffb73f12ad2ade176583fa4913 *vignettes/Figs/observed.pdf
 bdc72e869ffc6954a53c0c9355b1956d *vignettes/Figs/threshold.pdf
-875507f3f52f142b64d9f5c53a406508 *vignettes/QGglmmHowTo.Rnw
+da67048abe1ada581991c6b425e37b9a *vignettes/QGglmmHowTo.Rnw
 6278bd5a6bc5443d697982c9d17b260b *vignettes/Vignette.bib
 218ca145136d8e99d65d8d2cdd313c44 *vignettes/bigcenter.sty
 36fb5bc70432af4e7ff967a10f937a8b *vignettes/perso_sorted_en.bst

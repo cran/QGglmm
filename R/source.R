@@ -22,7 +22,7 @@
 
 
 
-#Calculating the observed/expected scale mean
+# Calculating the observed/expected scale mean
 QGmean <- function(mu = NULL, 
                    var, 
                    link.inv, 
@@ -33,7 +33,7 @@ QGmean <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -55,7 +55,7 @@ QGmean <- function(mu = NULL,
         )
 }
 
-#Calculating the expected scale variance
+# Calculating the expected scale variance
 QGvar.exp <- function(mu = NULL,
                       var,
                       link.inv,
@@ -67,7 +67,7 @@ QGvar.exp <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -75,7 +75,7 @@ QGvar.exp <- function(mu = NULL,
             predict <- mu
         }
     }
-    #If not provided, compute the obsereved mean
+    # If not provided, compute the obsereved mean
     if (is.null(obs.mean)) {
         obs.mean <- QGmean(mu        = mu, 
                            var       = var, 
@@ -83,7 +83,7 @@ QGvar.exp <- function(mu = NULL,
                            width     = width,
                            predict   = predict)
     }
-    #Note: Using Koenig's formula
+    # Note: Using Koenig's formula
     mean(
         sapply(predict,
                function(pred_i) {
@@ -99,7 +99,7 @@ QGvar.exp <- function(mu = NULL,
     ) - (obs.mean^2)
 }
 
-#Calculating the "distribution" variance
+# Calculating the "distribution" variance
 QGvar.dist <- function(mu = NULL, 
                        var, 
                        var.func, 
@@ -110,7 +110,7 @@ QGvar.dist <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -132,7 +132,7 @@ QGvar.dist <- function(mu = NULL,
     )
 }
 
-#Calculating "psi" for the observed additive genetic variance computation
+# Calculating "psi" for the observed additive genetic variance computation
 QGpsi <- function(mu = NULL, 
                   var, 
                   d.link.inv, 
@@ -143,7 +143,7 @@ QGpsi <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -167,7 +167,7 @@ QGpsi <- function(mu = NULL,
 
 ##  ------------------ Dictionary functions ----------------- ##
 
-#Function creating the needed functions according to the link name
+# Function creating the needed functions according to the link name
 QGlink.funcs <- function(name, 
                          n.obs = NULL,
                          theta = NULL)
@@ -223,6 +223,35 @@ QGlink.funcs <- function(name,
         inv.link    <- function(x) {x^2}
         var.func    <- function(x) {(x^2) + ((x^4) / theta)}
         d.inv.link  <- function(x) {2 * x}
+    } else if (name == "ZIPoisson.log.logit") {
+        inv.link    <- function(x) {
+            exp(x[1, ]) / (1 + exp(x[2, ]))
+        }
+        var.func    <- function(x) {
+            exp(x[1, ]) * (exp(x[2, ]) + exp(x[1, ] + x[2, ]) + 1) / ((1 + exp(x[2, ]))^2)
+        }
+        d.inv.link  <- function(x) {
+            rbind(
+                exp(x[1, ]) / (1 + exp(x[2, ])),
+                -exp(x[1, ] + x[2, ]) / ((1 + exp(x[2, ]))^2)
+            )
+        }
+    } else if (name == "HuPoisson.log.logit") {
+        inv.link    <- function(x) {
+            exp(x[1, ]) / ((1 + exp(x[2, ])) * ( 1 - exp(-exp(x[1, ]))))
+        }
+        var.func    <- function(x) {
+            m <- exp(x[1, ]) / ((1 + exp(x[2, ])) * ( 1 - exp(-exp(x[1, ]))))
+            m * (exp(x[1, ]) + 1 - m)
+        }
+        d.inv.link  <- function(x) {
+            rbind(
+                (1 / (1 + exp(x[2, ]))) * 
+                    (exp(x[1, ]) * ((1 - exp(-exp(x[1, ]))) - exp(x[1, ] - exp(x[1, ]))) /
+                     (1 - exp(-exp(x[1, ])))^2),
+                -exp(x[1, ] + x[2, ]) / (((1 + exp(x[2, ]))^2) * (1 - exp(-exp(x[1, ]))))
+            )
+        }
     } else {
         stop("Invalid model name. 
              Use a valid model name or enter a custom model specification.")
@@ -241,7 +270,7 @@ qg.Gaussian <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -250,7 +279,7 @@ qg.Gaussian <- function(mu = NULL,
         }
     }
     
-    #Nothing to be done, except averaging over predict
+    # Nothing to be done, except averaging over predict
     if (length(predict) == 1) {
         var_fixed <- 0
     } else {
@@ -272,7 +301,7 @@ qg.binom1.probit <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -281,13 +310,13 @@ qg.binom1.probit <- function(mu = NULL,
         }
     }
     
-    #Observed mean
+    # Observed mean
     p <- mean(1 - pnorm(0, predict, sqrt(var.p + 1)))
     
-    #Observed variance
+    # Observed variance
     var_obs <- p * (1 - p)
     
-    #Psi
+    # Psi
     Psi <- mean(dnorm(0, (predict), sqrt(var.p + 1)))
     
     data.frame(mean.obs     = p,
@@ -307,7 +336,7 @@ qg.binomN.probit <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -316,10 +345,10 @@ qg.binomN.probit <- function(mu = NULL,
         }
     }
   
-  #Observed mean
+  # Observed mean
   p <- n.obs * mean(1 - pnorm(0, predict, sqrt(var.p + 1)))
   
-  #Observed variance
+  # Observed variance
   prob.sq.int <- 
       mean(
           sapply(predict, 
@@ -336,7 +365,7 @@ qg.binomN.probit <- function(mu = NULL,
       )
   var_obs <- ((n.obs^2) - n.obs) * prob.sq.int - p^2 +p
   
-  #Psi
+  # Psi
   Psi <- n.obs * mean(dnorm(0, (predict), sqrt(var.p + 1)))
   
   data.frame(mean.obs   = p, 
@@ -354,7 +383,7 @@ qg.Poisson.log <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -363,13 +392,13 @@ qg.Poisson.log <- function(mu = NULL,
         }
     }
     
-    #Observed mean
+    # Observed mean
     lambda <- mean(exp(predict + (var.p / 2)))
     
-    #Mean of lambda square, needed for the following
+    # Mean of lambda square, needed for the following
     lambda_sq <- mean(exp(2 * (predict + var.p / 2)))
     
-    #Observed variance
+    # Observed variance
     var_obs <- lambda_sq * exp(var.p) - lambda^2 + lambda
     
     data.frame(mean.obs     = lambda, 
@@ -387,7 +416,7 @@ qg.Poisson.sqrt <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -396,16 +425,16 @@ qg.Poisson.sqrt <- function(mu = NULL,
         }
     }
     
-    #Observed mean
+    # Observed mean
     lambda <- mean((predict)^2 + var.p)
     
-    #Observed variance
+    # Observed variance
     var_obs <- mean((predict)^4 + 
                     6 * var.p * ((predict)^2) + 
                     3 * (var.p^2)) - 
                lambda^2 + lambda
     
-    #Psi
+    # Psi
     Psi <- mean(2 * (predict))
     
     data.frame(mean.obs     = lambda, 
@@ -424,7 +453,7 @@ qg.negbin.log <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -433,13 +462,13 @@ qg.negbin.log <- function(mu = NULL,
         }
     }
     
-    #Observed mean
+    # Observed mean
     lambda <- mean(exp(predict + (var.p / 2)))
     
-    #Mean of lambda square, needed for the following
+    # Mean of lambda square, needed for the following
     lambda_sq <- mean(exp(2 * (predict + var.p / 2)))
     
-    #Observed variance
+    # Observed variance
     var_obs <- lambda_sq * exp(var.p) - 
                lambda^2 + 
                lambda + 
@@ -461,7 +490,7 @@ qg.negbin.sqrt <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -470,10 +499,10 @@ qg.negbin.sqrt <- function(mu = NULL,
         }
     }
     
-    #Observed mean
+    # Observed mean
     lambda <- mean((predict)^2 + var.p)
     
-    #Observed variance
+    # Observed variance
     var_obs <- mean((predict)^4 + 
                     6 * var.p * ((predict)^2) + 
                     3 * (var.p^2)) -
@@ -482,7 +511,7 @@ qg.negbin.sqrt <- function(mu = NULL,
                      6 * var.p * ((predict)^2) + 
                      3 * (var.p^2)) / theta)
     
-    #Psi
+    # Psi
     Psi <- mean(2 * (predict))
     
     data.frame(mean.obs     = lambda, 
@@ -510,7 +539,7 @@ QGparams <- function(mu = NULL,
         stop("The parameters mu and var must be of length 1, 
              please check your input.")
     }
-    #If no fixed effects were included in the model
+    # If no fixed effects were included in the model
     if (is.null(predict)) {
         if(is.null(mu)) {
             stop("Please provide either mu or predict.")
@@ -518,10 +547,14 @@ QGparams <- function(mu = NULL,
             predict <- mu
         }
     }
+    # If a compound distribution was used, redirect toward QGmvparams
+    if (model %in% c("ZIPoisson.log.logit", "HuPoisson.log.logit")) {
+        stop("Compound distributions such as ZI or hurdle Poisson require using QGmvparams")
+    }
     
     ## Using analytical solutions if possible (and asked for: see closed.form)
     if (model == "Gaussian" & closed.form) {   
-        #Gaussian model with identity link (e.g. LMM)
+        # Gaussian model with identity link (e.g. LMM)
         if (verbose) {
             print("Using the closed forms for a Gaussian model
                   with identity link (e.g. LMM).")
@@ -533,7 +566,7 @@ QGparams <- function(mu = NULL,
                     predict = predict)
         
     } else if (model == "binom1.probit" & closed.form) {
-        #Binary.probit model
+        # Binary.probit model
         if (verbose) {
             print("Using the closed forms for a Binomial1 - probit model.")
         }
@@ -544,7 +577,7 @@ QGparams <- function(mu = NULL,
                          predict    = predict)
         
     } else if (model == "threshold") {
-        #Binary.probit model
+        # Binary.probit model
         if (verbose) {
             print("Using the closed forms for a threshold model 
                   (e.g. for MCMCglmm package). 
@@ -557,7 +590,7 @@ QGparams <- function(mu = NULL,
                          predict    = predict)
         
     } else if (model == "binomN.probit" & closed.form) {
-        #Binomial - not - binary model
+        # Binomial - not - binary model
         if (is.null(n.obs)) {
             stop("binomN.probit model used, 
                  but no observation number (n.obs) defined.")
@@ -577,7 +610,7 @@ QGparams <- function(mu = NULL,
                          width      = width)
         
     } else if (model == "Poisson.log" & closed.form){
-        #Poisson - log model
+        # Poisson - log model
         if(verbose) {
             print("Using the closed forms for a Poisson - log model.")
         }
@@ -588,7 +621,7 @@ QGparams <- function(mu = NULL,
                        predict  = predict)
         
     } else if (model == "Poisson.sqrt" & closed.form){
-        #Poisson - sqrt model
+        # Poisson - sqrt model
         if(verbose) {
             print("Using the closed forms for a Poisson - sqrt model.")
         }
@@ -599,7 +632,7 @@ QGparams <- function(mu = NULL,
                         predict = predict)
         
     } else if (model == "negbin.log" & closed.form){
-        #NegBin - log model
+        # NegBin - log model
         if (is.null(theta)) {
             stop("negbin model used, but theta not defined.")
         }
@@ -614,7 +647,7 @@ QGparams <- function(mu = NULL,
                       theta     = theta)
         
     } else if (model == "negbin.sqrt" & closed.form){
-        #NegBin - sqrt model
+        # NegBin - sqrt model
         if (is.null(theta)) {
             stop("negbin model used, but theta not defined.")
         }
@@ -629,7 +662,7 @@ QGparams <- function(mu = NULL,
                        theta    = theta)
         
     } else if (model == "ordinal"){
-        #Ordinal model
+        # Ordinal model
         if (is.null(cut.points)) {
             stop("cut points must be specified to use the ordinal model.")
         }
@@ -645,9 +678,9 @@ QGparams <- function(mu = NULL,
                    cut.points = cut.points)
     } else {
         
-        ##Else, use the general integral equations
+        ## Else, use the general integral equations
         
-        #Use a custom model if defined, otherwise look into the "Dictionary"
+        # Use a custom model if defined, otherwise look into the "Dictionary"
         if (is.null(custom.model)) {
             if (model == "") {
                 stop("The function requires either model or custom.model.")
@@ -658,7 +691,7 @@ QGparams <- function(mu = NULL,
             funcs <- custom.model
         }
         
-        #Observed mean computation
+        # Observed mean computation
         if (verbose) {
             print("Computing observed mean...")
         }
@@ -668,7 +701,7 @@ QGparams <- function(mu = NULL,
                         width       = width,
                         predict     = predict)
         
-        #Variances computation
+        # Variances computation
         if (verbose) {
             print("Computing variances...")
         }
@@ -685,7 +718,7 @@ QGparams <- function(mu = NULL,
                                predict  = predict)
         var_obs <- var_exp + var_dist
         
-        #Psi computation (for the observed additive genetic variance)
+        # Psi computation (for the observed additive genetic variance)
         if (verbose) {
             print("Computing Psi...")
         }
@@ -695,7 +728,7 @@ QGparams <- function(mu = NULL,
                      width      = width,
                      predict    = predict)
         
-        #Return a data.frame with the calculated components
+        # Return a data.frame with the calculated components
         data.frame(mean.obs     = z_bar,
                    var.obs      = var_obs,
                    var.a.obs    = (Psi^2) * var.a,
@@ -726,7 +759,7 @@ QGpred <- function(mu = NULL,
         }
     }
     
-    #Calculating the latent mean fitness
+    # Calculating the latent mean fitness
     if (verbose) {
         print("Computing mean fitness...")
     }
@@ -746,12 +779,12 @@ QGpred <- function(mu = NULL,
             )
         )
     
-    #Calculating the covariance between latent trait and latent fitness
+    # Calculating the covariance between latent trait and latent fitness
     if (verbose) {
         print("Computing the latent selection and response...")
     }
     
-    #Computing the derivative of fitness
+    # Computing the derivative of fitness
     dW <- 
         mean(
             sapply(predict, 
@@ -767,17 +800,17 @@ QGpred <- function(mu = NULL,
             )
         )
     
-    #Computing the selection
+    # Computing the selection
     if (length(predict) > 1) {
         sel <- (var.p + var(predict)) * dW / Wbar
     } else {
         sel <- var.p * dW / Wbar
     } 
     
-    #Computing the evolutionary response
+    # Computing the evolutionary response
     resp <- var.a * dW / Wbar
     
-    #Returning the results on the latent scale
+    # Returning the results on the latent scale
     data.frame(mean.lat.fit = Wbar, 
                lat.grad     = dW / Wbar,
                lat.sel      = sel,

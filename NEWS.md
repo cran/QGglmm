@@ -1,3 +1,13 @@
+## Version 0.8 (2025-01-20)
+
+### New features
+
+* Adding "compound" distributions (ZI-Poisson, hurdle-Poisson) to QGglmm
+
+### Bug fixes
+
+* Fixed various typos and issues in the doc
+
 ## Version 0.7 (2018-06-15)
 
 ### Important
@@ -23,6 +33,7 @@ Due to its removal from CRAN, QGglmm dropped R2Cuba as a dependency to solve mul
 * Updated to 0.7.2 to fix an issue with fancyvrb LaTeX package when building the vignette
 * Updated to 0.7.3 to fix an issue with binomN and n.obs in the multivariate functions
 * Updated to 0.7.4 after a problem for compiling vignette on CRAN
+* Updated to 0.7.5 to remove example in QGmvicc() man page that took too long on CRAN
 
 ## Version beta 0.6 (2017-10-09)
 
